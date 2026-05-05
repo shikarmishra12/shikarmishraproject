@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Inventory</title>
+</head>
+<body>
+    <h2>Book Inventory</h2>
+
+    <input id="title" placeholder="Title">
+    <input id="isbn" placeholder="ISBN">
+    <input id="author" placeholder="Author">
+    <button onclick="addBook()">Add Book</button>
+
+    <ul id="list"></ul>
+
+    <script>
+        async function fetchBooks(){
+            const res = await fetch('/api/books');
+            const data = await res.json();
+
+            document.getElementById('list').innerHTML =
+                data.map(b => `
+                    <li>
+                        ${b.title}
+                        <button onclick="deleteBook('${b._id}')">Delete</button>
+                    </li>
+                `).join('');
+        }
+
+        async function addBook(){
+            const title = document.getElementById('title').value;
+            const isbn = document.getElementById('isbn').value;
+            const author = document.getElementById('author').value;
+
+            await fetch('/api/books', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title, isbn, author})
+            });
+
+            fetchBooks();
+        }
+
+        async function deleteBook(id){
+            await fetch('/api/books/' + id, { method: 'DELETE' });
+            fetchBooks();
+        }
+
+        fetchBooks();
+    </script>
+</body>
+</html>
